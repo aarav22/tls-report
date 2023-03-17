@@ -1,0 +1,17 @@
+# git ignore for latex files
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.idx
+*.ind
+*.ilg
+*.glo

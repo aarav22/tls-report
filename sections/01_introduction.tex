@@ -1,0 +1,48 @@
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[node distance=0.5cm]
+        \tikzstyle{layer}=[rectangle, draw=black, fill=white, text width=5cm, text centered, minimum height=1cm]
+        % Application Layer
+        \node (app) [layer] {Application Layer};
+
+        % Transport Layer
+        \node (trans) [layer, below = of app] {Transport Layer};
+        \node (tcp) [right = 0.5cm of trans] {TCP};
+
+        % Network Layer
+        \node (inet) [layer, below = of trans] {Network Layer};
+        \node (ip) [right = 0.5cm of inet] {IP};
+
+        % Link Layer
+        \node (access) [layer, below = of inet] {Link Layer};
+        % \node (eth) [below = 0.5cm of access] {Ethernet};
+        % \node (wifi) [below = 0.5cm of eth] {Wi-Fi};
+
+        % Physical Layer
+        \node (phys) [layer, below = of access] {Physical Layer};
+
+        % Arrows
+        \draw[->,thick] (tcp) -- (trans);
+        \draw[->,thick] (ip) -- (inet);
+        \draw[->,thick] (app) -- (trans);
+        \draw[->,thick] (trans) -- (inet);
+        \draw[->,thick] (inet) -- (access);
+        \draw[->,thick] (access) -- (phys);
+    \end{tikzpicture}
+    \caption{The TCP/IP Reference Model \cite{tcpip}}
+    \label{fig:tcpip}
+\end{figure}
+
+When two computers want to send data to each other, they may use the \textbf{Internet Protocol} (IP) \cite{rfc791} directly. IP fragments data into blocks of data called \textit{packets} (also called datagrams) and transmits them from the source to the destination. The sources and destinations are computers identified by fixed length addresses. However, IP is a low-level protocol that does not interact directly with application data and may cause unreliable data transmission.
+
+In the TCP/IP Reference Model \cite{tcpip}, the IP protocol works in the network layer, which is two layers below the application layer (see Figure \ref{fig:tcpip}). This layer provides an unreliable, connectionless delivery system (there is no direct connection between two hosts) which does not provide any functionality for error recovery for datagrams that are either duplicated, lost or arrive at the remote host in another order than they were sent. The transport layer, which is the layer above the network layer, is responsible for fixing the unreliable data transmission with transport protocols like \textbf{Transmission Control Protocol (TCP)} \cite{rfc793}. TCP is the most commonly used transport protocol on top of IP and includes strategies for packet ordering, retransmission, and maintaining data integrity.
+
+TCP is a connection-oriented protocol, which means that before any data can be sent, a connection must be established between the two hosts. This connection is established by a three-way handshake between the two hosts. The first computer sends a packet with the SYN (a field in the TCP header) bit set to 1. The second computer responds with a packet with the SYN and ACK (another field in the TCP header) bits set to 1. The first computer then sends a packet with the ACK bit set to 1. Once the connection is established, the two hosts can start sending data to each other.
+
+Now that we have established a connection between two hosts and have the ability to reliably send data across, we can further improve the transmission by using \textbf{Transport Layer Security (TLS)} \cite{rfc8446} (original \cite{rfc2246}). TLS protocol allows two hosts to communicate in a way that is designed to prevent eavesdropping, tampering, or message forgery. While TCP provides reliable data transmission, the data in the packets is unencrypted and can be read by anyone who has access to the network. This is acceptable when the data is not sensitive, but when the data is sensitive, TLS is used to \textit{encrypt} the data. TLS also provides \textit{authentication} of the remote host, which means that the remote host can be trusted to be the host it claims to be.
+
+TLS is primarily used in a client/server setting where the client initiates the connection and the server responds. Setting up a TLS connection requires a handshake between the client and the server. At the end of the handshake, the client and the server have agreed upon a shared secret key which is used to encrypt the data, the encryption schemes and their parameters, and the client is also assured of the server's identity (not without issues \cite{rfc6962, tlsCertificateIssues}).
+
+In this report, we discuss TLS 1.3 \cite{rfc8446}, which is the latest version of TLS in two sections. Section 1 covers the \textit{handshake protocol} in TLS 1.3. Section 2 discusses the \textit{record protocol} that uses the parameters established by the handshake protocol to protect traffic between the communicating hosts.
+
