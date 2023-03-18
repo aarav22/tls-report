@@ -1,0 +1,46 @@
+\subsection{Authenticated Encryption with Associated Data (AEAD)}
+Cryptographic applications commonly require both confidentiality and message authentication. Confidentiality ensures that data is available only to those authorized to obtain it; usually it is realized through encryption.  Message authentication is the service that ensures that data has not been altered or forged by unauthorized entities; it can be achieved by using a Message Authentication Code (MAC). This service is also called data integrity. \textbf{Authenticated Encryption (AE)} \cite{ae} schemes ensure both data secrecy (confidentiality) and data integrity. These schemes can be constructed with either a \textbf{generic composition} that combines a CPA-secure cipher with a secure MAC, or to build them directly from a block cipher or a PRF without first constructing either a standalone cipher or MAC \cite{gradcourse}. The latter schemes are called \textbf{integrated schemes}. 
+
+Let $(E, D)$ be a cipher and $(S, V)$ be a MAC. Let $k_{enc}$ be a cipher key and $k_{mac}$ be a MAC key. In a generic composition, these two primitives can be combined using two commonly used options: \textbf{Encrypt-then-MAC} and \textbf{MAC-then-Encrypt}. In the first option, the plaintext is encrypted using the cipher and the resulting ciphertext is authenticated using the MAC. In the second option, the plaintext is authenticated using the MAC and the resulting MAC tag is encrypted using the cipher (see Figure \ref{fig:encrypt-then-mac} and Figure \ref{fig:mac-then-encrypt}). Only the first method is secure for every combination of CPA-secure cipher and secure MAC. The intuition is that the MAC on the ciphertext prevents any tampering with the ciphertext. The second method is known to have attacks in some cases \cite{gradcourse}. 
+
+TLS uses a nonce-based \textbf{Authenticated Encryption with Associated Data (AEAD)} \cite{aead} cipher to encrypt and authenticate packets. AEAD schemes are an extension of AE schemes (discussed above) that allow the sender to send additional data along with the message. This additional data is called the \textbf{associated data} (AD) and its integrity is protected by the ciphertext, but its secrecy is not. The associated data is required to set context; for example in a networking protocol, authenticated encryption protects the packet body, but the header must be transmitted in the clear so that the network can route the packet to its intended destination \cite{gradcourse}. Nonetheless, we want to ensure header integrity so that a malicious adversary can't get away with tampering the header. This header is provided as the associated data input to the AEAD encryption scheme. Secondly, the encryption scheme takes an additional input nonce $\mathcal{N}$, which is a random value that is used only once. This nonce ensures that the same plaintext is never encrypted to the same ciphertext. 
+% \newpage
+\begin{figure}[t]
+  \centering
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \begin{tikzpicture}[node distance=0 cm,outer sep = 0pt,inner sep = 2pt]
+      \tikzset{field/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=17mm,draw}}
+      \tikzset{largefield/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=34mm,draw}}
+    
+        \node [largefield] (message) {\textit{m}};
+        \node [largefield, below=of message] (empty) { };
+        \node [largefield,below=of empty,fill=gray!30] (enc) {$c \leftarrow E(k_{enc}, m)$};
+        \node [largefield,below=of enc] (mac) {$\text{tag } \leftarrow S(K_{mac}, c)$};
+        \node [field,below=of mac, xshift=-8.5mm, fill=gray!30] (cipher) {$c$};
+        \node [field,below=of mac, xshift=8.5mm] (tag) {tag};
+    \end{tikzpicture}
+    \caption{Encrypt-then-MAC}
+    \label{fig:encrypt-then-mac}
+  \end{subfigure}
+  \begin{subfigure}[b]{0.4\textwidth}
+    \centering
+    \begin{tikzpicture}[node distance=0 cm,outer sep = 0pt,inner sep = 2pt]
+        \tikzset{field/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=17mm,draw}}
+        \tikzset{largefield/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=34mm,draw}}
+    
+        \node [largefield] (message) {\textit{m}};
+        \node [largefield,below=of message] (mac) {$\text{tag } \leftarrow S(K_{mac}, m)$};
+        \node [field,below=of mac, xshift=-8.5mm] (pkt-m) {$m$};
+        \node [field,below=of mac, xshift=8.5mm] (tag) {tag};
+        \node [largefield, below=of pkt-m, xshift=8.5mm] (empty) { };
+        \node [largefield,below=of empty,fill=gray!30] (enc) {$c \leftarrow E(k_{enc}, (m, tag))$};
+  
+    \end{tikzpicture}
+    \caption{MAC-then-Encrypt}
+    \label{fig:mac-then-encrypt}
+  \end{subfigure}
+  \label{fig:encrypt-then-mac-mac-then-encrypt}
+  \caption{Two different ways to combine a cipher and a MAC.}
+  \hrulefill
+\end{figure}
