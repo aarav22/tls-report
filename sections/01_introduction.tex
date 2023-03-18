@@ -1,37 +1,23 @@
 
 \begin{figure}[H]
     \centering
-    \begin{tikzpicture}[node distance=0.5cm]
-        \tikzstyle{layer}=[rectangle, draw=black, fill=white, text width=5cm, text centered, minimum height=1cm]
-        % Application Layer
-        \node (app) [layer] {Application Layer};
-
-        % Transport Layer
-        \node (trans) [layer, below = of app] {Transport Layer};
-        \node (tcp) [right = 0.5cm of trans] {TCP};
-
-        % Network Layer
-        \node (inet) [layer, below = of trans] {Network Layer};
-        \node (ip) [right = 0.5cm of inet] {IP};
-
-        % Link Layer
-        \node (access) [layer, below = of inet] {Link Layer};
-        % \node (eth) [below = 0.5cm of access] {Ethernet};
-        % \node (wifi) [below = 0.5cm of eth] {Wi-Fi};
-
-        % Physical Layer
-        \node (phys) [layer, below = of access] {Physical Layer};
-
-        % Arrows
-        \draw[->,thick] (tcp) -- (trans);
-        \draw[->,thick] (ip) -- (inet);
-        \draw[->,thick] (app) -- (trans);
-        \draw[->,thick] (trans) -- (inet);
-        \draw[->,thick] (inet) -- (access);
-        \draw[->,thick] (access) -- (phys);
+    \begin{tikzpicture}[node distance=0 cm,outer sep = 0pt,inner sep = 2pt]
+        \tikzset{field/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=9mm,draw}}
+        \tikzset{largefield/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=27mm,draw}}
+    
+        \node [largefield] (application) {Application};
+        % \node [field,right=of tor] (vpn) {VPN};
+        % \node [field,right=of vpn] {\dots};
+    
+        \node [largefield,below=of application] (transport) {Transport};
+        \node [largefield,below=of transport,fill=gray!30] (network) {\textbf{Network}};
+        \node [largefield,below=of network] (phys) {Physical};
+        \node [largefield,below=of phys] {Link Layer};
     \end{tikzpicture}
+    
     \caption{The TCP/IP Reference Model \cite{tcpip}}
     \label{fig:tcpip}
+    \hrulefill
 \end{figure}
 
 When two computers want to send data to each other, they may use the \textbf{Internet Protocol} (IP) \cite{rfc791} directly. IP fragments data into blocks of data called \textit{packets} (also called datagrams) and transmits them from the source to the destination. The sources and destinations are computers identified by fixed length addresses. However, IP is a low-level protocol that does not interact directly with application data and may cause unreliable data transmission.
