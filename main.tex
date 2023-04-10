@@ -53,6 +53,7 @@
 \makeatother
 
 \usepackage{authblk}
+\def\code#1{\texttt{#1}}
 \renewcommand\Authfont{\fontsize{10}{10.8}\selectfont}
 \renewcommand\Affilfont{\fontsize{10}{10.8}\selectfont}
 \renewcommand*{\Authsep}{, }
@@ -101,10 +102,16 @@
 \input{sections/01_introduction.tex}
 
 \section{Background}
+\label{sec:background}
 \input{sections/02_background.tex}
 
 \section{TLS Handshake Protocol}
+\label{sec:handshake}
 \input{sections/03_handshake.tex}
+
+\section{TLS Record Protocol}
+\label{sec:record}
+\input{sections/04_record.tex}
 % \section{Design}
 % \input{sections/03_design.tex}
 % \section{Applications}

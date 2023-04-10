@@ -160,3 +160,48 @@ series = {CCS '02}
     month =     jan,
     abstract =  {This document defines algorithms for Authenticated Encryption with Associated Data (AEAD), and defines a uniform interface and a registry for such algorithms. The interface and registry can be used as an application-independent set of cryptoalgorithm suites. This approach provides advantages in efficiency and security, and promotes the reuse of crypto implementations. {[}STANDARDS-TRACK{]}},
 }
+
+@misc{rfc5869,
+    series =    {Request for Comments},
+    number =    5869,
+    howpublished =  {RFC 5869},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC5869},
+    url =       {https://www.rfc-editor.org/info/rfc5869},
+        author =    {Dr. Hugo Krawczyk and Pasi Eronen},
+    title =     {{HMAC-based Extract-and-Expand Key Derivation Function (HKDF)}},
+    pagetotal = 14,
+    year =      2010,
+    month =     may,
+    abstract =  {This document specifies a simple Hashed Message Authentication Code (HMAC)-based key derivation function (HKDF), which can be used as a building block in various protocols and applications. The key derivation function (KDF) is intended to support a wide range of applications and requirements, and is conservative in its use of cryptographic hash functions. This document is not an Internet Standards Track specification; it is published for informational purposes.},
+}
+
+@InProceedings{hdkf,
+author="Krawczyk, Hugo",
+editor="Rabin, Tal",
+title="Cryptographic Extraction and Key Derivation: The HKDF Scheme",
+booktitle="Advances in Cryptology -- CRYPTO 2010",
+year="2010",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="631--648",
+abstract="In spite of the central role of key derivation functions (KDF) in applied cryptography, there has been little formal work addressing the design and analysis of general multi-purpose KDFs. In practice, most KDFs (including those widely standardized) follow ad-hoc approaches that treat cryptographic hash functions as perfectly random functions. In this paper we close some gaps between theory and practice by contributing to the study and engineering of KDFs in several ways. We provide detailed rationale for the design of KDFs based on the extract-then-expand approach; we present the first general and rigorous definition of KDFs and their security that we base on the notion of computational extractors; we specify a concrete fully practical KDF based on the HMAC construction; and we provide an analysis of this construction based on the extraction and pseudorandom properties of HMAC. The resultant KDF design can support a large variety of KDF applications under suitable assumptions on the underlying hash function; particular attention and effort is devoted to minimizing these assumptions as much as possible for each usage scenario.",
+isbn="978-3-642-14623-7"
+}
+
+@misc{rfc2104,
+    series =    {Request for Comments},
+    number =    2104,
+    howpublished =  {RFC 2104},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC2104},
+    url =       {https://www.rfc-editor.org/info/rfc2104},
+        author =    {Dr. Hugo Krawczyk and Mihir Bellare and Ran Canetti},
+    title =     {{HMAC: Keyed-Hashing for Message Authentication}},
+    pagetotal = 11,
+    year =      1997,
+    month =     feb,
+    abstract =  {This document describes HMAC, a mechanism for message authentication using cryptographic hash functions. HMAC can be used with any iterative cryptographic hash function, e.g., MD5, SHA-1, in combination with a secret shared key. The cryptographic strength of HMAC depends on the properties of the underlying hash function. This memo provides information for the Internet community. This memo does not specify an Internet standard of any kind},
+}
+
+

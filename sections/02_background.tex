@@ -1,9 +1,22 @@
+\subsection{Authenticated Encryption (AE)}
+Cryptographic applications commonly require both confidentiality and message authentication. Confidentiality ensures that data is available only to those authorized to obtain it; usually it is realized through encryption.  Message authentication is the service that ensures that data has not been altered or forged by unauthorized entities; it can be achieved by using a Message Authentication Code (MAC). This service is also called data integrity. \textbf{Authenticated Encryption (AE)} \cite{ae} schemes ensure both data secrecy (confidentiality) and data integrity. These schemes can be constructed with either a \textbf{generic composition} that combines a CPA-secure cipher with a secure MAC, or to build them directly from a block cipher or a PRF without first constructing either a standalone cipher or MAC \cite{gradcourse}. The latter schemes are called \textbf{integrated schemes}.
+
+Let $(E, D)$ be a cipher and $(S, V)$ be a MAC. Let $k_{enc}$ be a cipher key and $k_{mac}$ be a MAC key. In a generic composition, these two primitives can be combined using two commonly used options: \textbf{Encrypt-then-MAC} and \textbf{MAC-then-Encrypt}. In the first option, the plaintext is encrypted using the cipher and the resulting ciphertext is authenticated using the MAC. In the second variant, the plaintext is first authenticated using the MAC and the resulting MAC tag along with the plaintext is encrypted using the cipher (see Figure \ref{fig:encrypt-then-mac} and Figure \ref{fig:mac-then-encrypt}). Only the first method is secure for every combination of CPA-secure cipher and secure MAC. The intuition is that the MAC on the ciphertext prevents any tampering with the ciphertext. The second method is known to have attacks in some cases \cite{gradcourse}.
+
 \subsection{Authenticated Encryption with Associated Data (AEAD)}
-Cryptographic applications commonly require both confidentiality and message authentication. Confidentiality ensures that data is available only to those authorized to obtain it; usually it is realized through encryption.  Message authentication is the service that ensures that data has not been altered or forged by unauthorized entities; it can be achieved by using a Message Authentication Code (MAC). This service is also called data integrity. \textbf{Authenticated Encryption (AE)} \cite{ae} schemes ensure both data secrecy (confidentiality) and data integrity. These schemes can be constructed with either a \textbf{generic composition} that combines a CPA-secure cipher with a secure MAC, or to build them directly from a block cipher or a PRF without first constructing either a standalone cipher or MAC \cite{gradcourse}. The latter schemes are called \textbf{integrated schemes}. 
+TLS uses a nonce-based \textbf{Authenticated Encryption with Associated Data (AEAD)} \cite{aead} cipher to encrypt and authenticate packets. AEAD schemes are an extension of AE schemes (discussed above) that adds the ability to check the integrity and authenticity of some Associated Data (AD), also called "additional authenticated data", that is not encrypted. The associated data is required to set context; for example in a networking protocol, authenticated encryption protects the packet body, but the header must be transmitted in the clear so that the network can route the packet to its intended destination \cite{gradcourse}. Nonetheless, we want to ensure header integrity so that a malicious adversary can't get away with tampering the header. This header is provided as the associated data input to the AEAD encryption scheme. Secondly, the encryption scheme takes an additional input nonce $\mathcal{N}$, which is a random value that is used only once. This nonce ensures that the same plaintext is never encrypted to the same ciphertext. The nonce can be kept with the encrypted message or created just before it's decrypted. The decryption process only needs enough information to reconstruct the nonce. For example, a system could use a nonce consisting of a sequence number in a particular format, in which case it could be inferred from the order of the ciphertexts. If a wrong nonce is used, the decryption process will still detect it as incorrect, so it won't compromise security.
 
-Let $(E, D)$ be a cipher and $(S, V)$ be a MAC. Let $k_{enc}$ be a cipher key and $k_{mac}$ be a MAC key. In a generic composition, these two primitives can be combined using two commonly used options: \textbf{Encrypt-then-MAC} and \textbf{MAC-then-Encrypt}. In the first option, the plaintext is encrypted using the cipher and the resulting ciphertext is authenticated using the MAC. In the second option, the plaintext is authenticated using the MAC and the resulting MAC tag is encrypted using the cipher (see Figure \ref{fig:encrypt-then-mac} and Figure \ref{fig:mac-then-encrypt}). Only the first method is secure for every combination of CPA-secure cipher and secure MAC. The intuition is that the MAC on the ciphertext prevents any tampering with the ciphertext. The second method is known to have attacks in some cases \cite{gradcourse}. 
-
-TLS uses a nonce-based \textbf{Authenticated Encryption with Associated Data (AEAD)} \cite{aead} cipher to encrypt and authenticate packets. AEAD schemes are an extension of AE schemes (discussed above) that allow the sender to send additional data along with the message. This additional data is called the \textbf{associated data} (AD) and its integrity is protected by the ciphertext, but its secrecy is not. The associated data is required to set context; for example in a networking protocol, authenticated encryption protects the packet body, but the header must be transmitted in the clear so that the network can route the packet to its intended destination \cite{gradcourse}. Nonetheless, we want to ensure header integrity so that a malicious adversary can't get away with tampering the header. This header is provided as the associated data input to the AEAD encryption scheme. Secondly, the encryption scheme takes an additional input nonce $\mathcal{N}$, which is a random value that is used only once. This nonce ensures that the same plaintext is never encrypted to the same ciphertext. 
+The interface to the AEAD is relatively simple, since it requires only a single key as input and requires only a single identifier to indicate the algorithm in use in a particular case unlike AE where you have to specify the combination of cipher and MAC. The authenticated encryption operation has four inputs, each of which is an octet string:
+\begin{enumerate}
+  \item A secret key K, which MUST be generated in a way that is uniformly
+        random or pseudorandom.
+  \item A nonce $\mathcal{N}$. Each nonce provided to distinct invocations of the
+        Authenticated Encryption operation MUST be distinct, for any particular value of the key, unless each and every nonce is zero-
+        length.
+  \item A plaintext P, which contains the data to be encrypted and authenticated.
+  \item The associated data A, which contains the data to be authenticated, but not encrypted.
+\end{enumerate}
+The output is a ciphertext C, which is at least as long as the plaintext.
 % \newpage
 \begin{figure}[t]
   \centering
@@ -12,13 +25,13 @@ TLS uses a nonce-based \textbf{Authenticated Encryption with Associated Data (AE
     \begin{tikzpicture}[node distance=0 cm,outer sep = 0pt,inner sep = 2pt]
       \tikzset{field/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=17mm,draw}}
       \tikzset{largefield/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=34mm,draw}}
-    
-        \node [largefield] (message) {\textit{m}};
-        \node [largefield, below=of message] (empty) { };
-        \node [largefield,below=of empty,fill=gray!30] (enc) {$c \leftarrow E(k_{enc}, m)$};
-        \node [largefield,below=of enc] (mac) {$\text{tag } \leftarrow S(K_{mac}, c)$};
-        \node [field,below=of mac, xshift=-8.5mm, fill=gray!30] (cipher) {$c$};
-        \node [field,below=of mac, xshift=8.5mm] (tag) {tag};
+
+      \node [largefield] (message) {\textit{m}};
+      \node [largefield, below=of message] (empty) { };
+      \node [largefield,below=of empty,fill=gray!30] (enc) {$c \leftarrow E(k_{enc}, m)$};
+      \node [largefield,below=of enc] (mac) {$\text{tag } \leftarrow S(K_{mac}, c)$};
+      \node [field,below=of mac, xshift=-8.5mm, fill=gray!30] (cipher) {$c$};
+      \node [field,below=of mac, xshift=8.5mm] (tag) {tag};
     \end{tikzpicture}
     \caption{Encrypt-then-MAC}
     \label{fig:encrypt-then-mac}
@@ -26,16 +39,16 @@ TLS uses a nonce-based \textbf{Authenticated Encryption with Associated Data (AE
   \begin{subfigure}[b]{0.4\textwidth}
     \centering
     \begin{tikzpicture}[node distance=0 cm,outer sep = 0pt,inner sep = 2pt]
-        \tikzset{field/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=17mm,draw}}
-        \tikzset{largefield/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=34mm,draw}}
-    
-        \node [largefield] (message) {\textit{m}};
-        \node [largefield,below=of message] (mac) {$\text{tag } \leftarrow S(K_{mac}, m)$};
-        \node [field,below=of mac, xshift=-8.5mm] (pkt-m) {$m$};
-        \node [field,below=of mac, xshift=8.5mm] (tag) {tag};
-        \node [largefield, below=of pkt-m, xshift=8.5mm] (empty) { };
-        \node [largefield,below=of empty,fill=gray!30] (enc) {$c \leftarrow E(k_{enc}, (m, tag))$};
-  
+      \tikzset{field/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=17mm,draw}}
+      \tikzset{largefield/.style={align=center,shape=rectangle,minimum height=0.5cm,minimum width=34mm,draw}}
+
+      \node [largefield] (message) {\textit{m}};
+      \node [largefield,below=of message] (mac) {$\text{tag } \leftarrow S(K_{mac}, m)$};
+      \node [field,below=of mac, xshift=-8.5mm] (pkt-m) {$m$};
+      \node [field,below=of mac, xshift=8.5mm] (tag) {tag};
+      \node [largefield, below=of pkt-m, xshift=8.5mm] (empty) { };
+      \node [largefield,below=of empty,fill=gray!30] (enc) {$c \leftarrow E(k_{enc}, (m, tag))$};
+
     \end{tikzpicture}
     \caption{MAC-then-Encrypt}
     \label{fig:mac-then-encrypt}
@@ -44,3 +57,52 @@ TLS uses a nonce-based \textbf{Authenticated Encryption with Associated Data (AE
   \caption{Two different ways to combine a cipher and a MAC.}
   \hrulefill
 \end{figure}
+
+\subsection{HMAC-based Extract-and-Expand Key Derivation Function (HKDF)}
+The TLS handshake establishes one or more input secrets which are combined to create the actual working keying material using HKDF which uses HMAC at its core.
+
+Hashed Message Authentication Code (HMAC) \cite{rfc2104} is based on a cryptographic hash function $H : \{0, 1\}^* \rightarrow \{0, 1\}^\lambda$ and keyed with some key $K \in \{0, 1\}^\lambda$ (larger key material is hashed through H to obtain a $\lambda$-bit key). Computing the HMAC value on some message m is then defined as $\textit{HMAC}(K, m) := H((K \oplus \textit{opad}) \mathbin\Vert H((K \oplus \textit{ipad}) \mathbin\Vert m))$, where \textit{opad} and \textit{ipad} are two $\lambda$-bit padding values consisting of repeated bytes 0x5c and 0x36, respectively.
+
+A key derivation function (KDF) is a basic and essential component of cryptographic systems.  Its goal is to take some source of initial keying material and derive from it one or more cryptographically strong secret keys \cite{hdkf}. The main difficulty in designing a KDF relates to the form of the initial keying material. When this key material is given as a uniformly random or pseudorandom key $K$ then one can use $K$ to seed a pseudorandom function (PRF) or pseudorandom generator (PRG) to produce additional cryptographic keys. However, when the source keying material is not uniformly random or pseudorandom then the KDF needs to first ``extract'' from this ``imperfect'' source a first pseudorandom key from which further keys can be derived using a PRF. Thus, one identifies two logical modules in a KDF: a first module that takes the source keying material and extracts from it a fixed-length pseudorandom key K, and a second module that expands K into several additional pseudorandom cryptographic keys. This two-module paradigm is called the ``extract-then-expand'' paradigm. 
+
+The expansion module is standard in cryptography and can be implemented on the basis of any secure PRF. The extraction functionality, in turn, is well modeled by the notion of randomness extractors \cite{hdkf}. There exists computational extractors, namely randomness extractors where the output is only required to be pseudorandom rather than statistically close to uniform. Computational extractors are well-suited for the cryptographic setting where attackers are computationally bounded and source entropy may only exist in a computational sense. KDFs accept four inputs: a sample from the source of keying material from which the KDF needs to extract cryptographic keys, a parameter defining the number of key bits to be output, an (optional) randomizing salt value as mentioned before, and a fourth ``contextual information'' field. The latter is an important parameter for the KDF intended to include key-related information that needs to be uniquely and cryptographically bound to the produced key material (e.g., a protocol identifier, identities of principals, timestamps, etc.) \cite{hdkf}. 
+
+The computation of extract-then-expand KDFs is specified as follows:
+\begin{equation}
+\label{eq:hdkf1}
+\begin{split}
+  & \textit{PRK = XTR (XTS, SKM)} \\
+  & \textit{KM = PRF*(PRK, CTXinfo, L)}
+\end{split}
+\end{equation}
+  
+where \textit{XTR} is the extractor function, \textit{PRF*} is a variable-length output pseudorandom function used in the expansion module, and $L$ is the desired length of the output key material.
+
+HMAC-based key derivation function (HKDF) \cite{hdkf} follows the above mentioned "extract-then-expand" paradigm and uses HMAC as the underlying PRF in both extract and expand modules. HDKF is specified as: 
+
+\begin{equation}
+\label{eq:hdkf}
+\text{HKDF}(\textit{XTS}, \textit{SKM}, \textit{CTXinfo}, L) = K(1)\mathbin\Vert K(2) \mathbin\Vert . . . \mathbin\Vert K(t)
+\end{equation}
+
+where the values $K(i)$ are defined as follows:
+\begin{equation}
+\label{eq:hdkf2}
+\begin{split}
+  &PRK = \text{HMAC}(\textit{XTS}, \textit{SKM}) \\
+  &K(1) = \text{HMAC}(\textit{PRK}, \textit{CTXinfo} \mathbin\Vert 0) \\
+  &K(i + 1) = \text{HMAC}(\textit{PRK}, K(i) \mathbin\Vert \textit{CTXinfo} \mathbin\Vert i) 1 \leq i \le t,
+\end{split}
+\end{equation}
+where $t = \lceil L/k \rceil$  where $k$ denotes the output (and key) length of the hash function used with HMAC and the value $K(t)$ is truncated to its first $d = L \mod k$ bits; the counter $i$ is of a given fixed size, e.g., a single byte. The source key material is \textit{SKM}, the extractor salt is \textit{XTS} (which may be null or constant), the number \textit{L} of key bits to be produced by KDF, and a ``context information'' string \textit{CTXinfo} (which may be null) \cite{hdkf}.
+
+\subsection{TLS 1.3 Key Derivation}
+\fbox{\parbox{\textwidth}{The Key Derivation process in TLS 1.3 makes use of the HKDF-Extract and HKDF-Expand functions as well as the functions defined below \cite{rfc8446}:
+\begin{itemize}
+  \item \textbf{HKDF-Extract}: HKDF-Extract(Salt, IKM) $\rightarrow$ PRK
+  \item \textbf{HKDF-Expand}: HKDF-Expand(PRK, Info, L) $\rightarrow$ OKM
+  \item \textbf{HKDF-Expand-Label}: HKDF-Expand-Label(Secret, Label, Context, Length) $\rightarrow$ HKDF-Expand(Secret, HkdfLabel, Length)
+  \item \textbf{HkdfLabel}: HkdfLabel(Length, Label, Context): (length = Length; label = "tls13 " + Label; context = Context) $\rightarrow$ HkdfLabel
+  \item \textbf{Derive-Secret}: Derive-Secret(Secret, Label, Messages) $\rightarrow$ HKDF-Expand-Label(Secret, Label, Transcript-Hash(Messages), Hash.length)
+\end{itemize}
+}}
